@@ -60,8 +60,28 @@ with st.sidebar:
     has_water = st.checkbox("Presence of Liquid Water", value=True)
  
     # The prediction button
-    predict_button = st.button("Predict Life Likelihood", type="primary", use_container_width=True)
+    predict_button = st.button("Predict Life Likelihood", type="primary", use_container_width=True, key="predict")
  
+    # --- Event Trigger Section ---
+    # This section only appears if a planet has been generated
+    if st.session_state.get("prediction_result"):
+        st.markdown("---")
+        st.header("☄️ Trigger Event")
+        event_type = st.selectbox(
+            "Select an event to unleash:",
+            ("Asteroid Impact", "Pandemic Outbreak", "Super-Volcano Eruption"),
+            index=None,
+            placeholder="Select a cataclysm...",
+            key="event_selector"
+        )
+        
+        if st.button("Unleash Event", use_container_width=True, key="unleash"):
+            if event_type:
+                # Re-run prediction with the selected event
+                event_prediction = model.predict_life(st.session_state.input_data, event=event_type)
+                st.session_state.prediction_result = event_prediction
+                st.toast(f"Event triggered: {event_type}!", icon="💥")
+                st.rerun()
 # --- Main Panel for Title and Results ---
 st.title("Elemental Life Prediction 🌌")
 st.write(
@@ -110,14 +130,14 @@ if st.session_state.prediction_result:
         fig = utils.generate_visualization(prediction)
         st.pyplot(fig)
 
-        # Display the reasoning
-        st.subheader("Reasoning Breakdown")
-        st.info(prediction['description'])
- 
     with col2:
         st.subheader("Interactive Planet Model")
         globe_fig = utils.generate_3d_globe(input_data)
         st.plotly_chart(globe_fig, use_container_width=True)
+
+    # Display the reasoning below the columns to use the full width
+    st.subheader("Reasoning Breakdown")
+    st.info(prediction['description'])
 
 # --- Disclaimer ---
 st.markdown("---")

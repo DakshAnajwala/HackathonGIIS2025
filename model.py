@@ -1,6 +1,6 @@
 import numpy as np
 
-def predict_life(input_data):
+def predict_life(input_data, event=None):
     """
     A more sophisticated model to predict the probability of life.
 
@@ -9,6 +9,7 @@ def predict_life(input_data):
 
     Args:
         input_data (dict): A dictionary containing planet parameters.
+        event (str, optional): A catastrophic event to apply. Defaults to None.
 
     Returns:
         dict: A dictionary with 'probability' and 'description' of life.
@@ -69,15 +70,35 @@ def predict_life(input_data):
     pressure_factor = 1.0
     if 0.5 <= pressure <= 10:
         description_parts.append(f"✅ Atmospheric pressure ({pressure} atm) is suitable for maintaining liquid water and stable conditions.")
+    elif pressure > 10:
+        pressure_factor = 0.6  # Significant penalty for non-ideal pressure
+        description_parts.append(f"⚠️ High atmospheric pressure ({pressure} atm) poses significant challenges for complex life.")
     else:  # pressure < 0.5
         pressure_factor = 0.6  # Significant penalty for non-ideal pressure
-        if pressure > 10:
-            description_parts.append(f"⚠️ High atmospheric pressure ({pressure} atm) poses significant challenges for complex life.")
-        else:  # pressure < 0.5
-            description_parts.append(f"⚠️ Low atmospheric pressure ({pressure} atm) makes it difficult to maintain liquid water on the surface.")
+        description_parts.append(f"⚠️ Low atmospheric pressure ({pressure} atm) makes it difficult to maintain liquid water on the surface.")
 
     # --- Step 3: Calculate final probability ---
     final_probability = base_probability * temp_factor * pressure_factor
+
+    # --- Step 4: Apply one-time event modifiers ---
+    if event:
+        event_description = ""
+        if event == "Asteroid Impact":
+            final_probability *= 0.1  # 90% reduction
+            event_description = "💥 An asteroid impact has likely caused a mass extinction event, devastating the biosphere."
+        elif event == "Pandemic Outbreak":
+            # A pandemic is only devastating if there's complex life to infect
+            if final_probability > 0.2:
+                final_probability *= 0.3  # 70% reduction
+                event_description = "🦠 A virulent pandemic is sweeping the planet, causing an ecosystem collapse."
+            else:
+                event_description = "🦠 A pandemic was introduced, but found no complex life to infect."
+        elif event == "Super-Volcano Eruption":
+            final_probability *= 0.5  # 50% reduction
+            event_description = "🌋 A super-volcano has erupted, blanketing the atmosphere in ash and triggering a volcanic winter."
+
+        if event_description:
+            description_parts.append(event_description)
 
     # Join the reasoning parts into a single string, separated by newlines for readability
     final_description = "\n\n".join(description_parts)

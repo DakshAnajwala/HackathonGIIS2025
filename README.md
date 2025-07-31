@@ -38,7 +38,7 @@ To get the application running on your local machine, follow these steps.
 3.  **Install the required dependencies:**
     *(Note: You should create a `requirements.txt` file for this project)*
     ```bash
-    pip install streamlit numpy matplotlib
+    pip install streamlit numpy matplotlib plotly
     ```
 
 4.  **Run the Streamlit application:**
